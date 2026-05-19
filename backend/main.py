@@ -416,47 +416,75 @@ class SubtitleRemover:
         self.append_output(tr['Main']['SubtitleDetectionModel'].format(f"{detect_mode_name}{providers_str}"))
 
     def merge_audio_to_video(self):
-        # 创建音频临时对象，windows下delete=True会有permission denied的报错
-        temp = tempfile.NamedTemporaryFile(suffix='.aac', delete=False)
-        audio_extract_command = [FFmpegCLI.instance().ffmpeg_path,
-                                 "-y", "-i", self.video_path,
-                                 "-acodec", "copy",
-                                 "-vn", "-loglevel", "error", temp.name]
-        use_shell = True if os.name == "nt" else False
-        try:
-            subprocess.check_output(audio_extract_command, stdin=open(os.devnull), shell=use_shell, timeout=600)
-        except Exception as e:
-            traceback.print_exc()
-            self.append_output(tr['Main']['FailToExtractAudio'].format(str(e)))
+        """Mux inpainted video with audio from the source clip.
+
+        Older logic extracted audio to a temporary ``.aac`` with ``-acodec copy``,
+        which fails when the source uses AC3/DTS/MP3 (ADTS muxer only accepts AAC).
+        We now mux in one step and fall back to AAC re-encode for MP4 compatibility.
+        """
+        if not os.path.exists(self.video_temp_file.name):
+            self.video_temp_file.close()
             return
-        else:
-            if os.path.exists(self.video_temp_file.name):
-                audio_merge_command = [FFmpegCLI.instance().ffmpeg_path,
-                                       "-y", "-i", self.video_temp_file.name,
-                                       "-i", temp.name,
-                                       "-vcodec", "copy",
-                                       "-acodec", "copy",
-                                       "-loglevel", "error", self.video_out_path]
-                try:
-                    subprocess.check_output(audio_merge_command, stdin=open(os.devnull), shell=use_shell, timeout=600)
-                except Exception as e:
-                    traceback.print_exc()
-                    self.append_output(tr['Main']['FailToMergeAudio'].format(str(e)))
-                    return
-            if os.path.exists(temp.name):
-                try:
-                    os.remove(temp.name)
-                except Exception:
-                    #ignore
-                    pass
-            self.is_successful_merged = True
+
+        ffmpeg = FFmpegCLI.instance().ffmpeg_path
+
+        def _try_merge(audio_args: list[str]) -> bool:
+            cmd = [
+                ffmpeg,
+                "-y",
+                "-i",
+                self.video_temp_file.name,
+                "-i",
+                self.video_path,
+                "-map",
+                "0:v:0",
+                "-map",
+                "1:a:0?",
+                "-c:v",
+                "copy",
+                *audio_args,
+                "-shortest",
+                "-movflags",
+                "+faststart",
+                "-loglevel",
+                "error",
+                self.video_out_path,
+            ]
+            try:
+                with open(os.devnull, "rb") as devnull:
+                    subprocess.check_output(cmd, stdin=devnull, timeout=600)
+                return True
+            except Exception:
+                traceback.print_exc()
+                return False
+
+        try:
+            if _try_merge(["-c:a", "copy"]):
+                self.is_successful_merged = True
+                return
+            self.append_output(
+                "Audio stream-copy merge failed (non-AAC or incompatible codec); "
+                "re-encoding audio to AAC…"
+            )
+            if _try_merge(["-c:a", "aac", "-b:a", "192k"]):
+                self.is_successful_merged = True
+                return
+            self.append_output(
+                tr["Main"]["FailToMergeAudio"].format("see traceback above")
+            )
         finally:
-            temp.close()
             if not self.is_successful_merged:
                 try:
                     shutil.copy2(self.video_temp_file.name, self.video_out_path)
+                    self.append_output(
+                        "Warning: output has no audio (merge failed); using silent video."
+                    )
                 except IOError as e:
-                    self.append_output(tr['Main']['CopyFileFailed'].format(self.video_temp_file.name, self.video_out_path, str(e)))
+                    self.append_output(
+                        tr["Main"]["CopyFileFailed"].format(
+                            self.video_temp_file.name, self.video_out_path, str(e)
+                        )
+                    )
             self.video_temp_file.close()
 
     @cached_property
