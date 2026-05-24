@@ -38,6 +38,17 @@ class SubtitleDetect:
         else:
             self.SAMPLE_STEP = 2
 
+    @staticmethod
+    def _ocr_enable_hpi(onnx_providers) -> bool:
+        """Use PaddleX HPIP when ONNX providers exist and ultra-infer is installed."""
+        if not onnx_providers:
+            return False
+        try:
+            from paddlex.utils.deps import is_hpip_available
+        except ImportError:
+            return False
+        return bool(is_hpip_available())
+
     @cached_property
     def text_detector(self):
         import paddle
@@ -46,11 +57,12 @@ class SubtitleDetect:
         hardware_accelerator = HardwareAccelerator.instance()
         onnx_providers = hardware_accelerator.onnx_providers
         model_config = ModelConfig()
+        enable_hpi = self._ocr_enable_hpi(onnx_providers)
         return TextDetection(
             model_name=model_config.DET_MODEL_NAME,
             model_dir=model_config.DET_MODEL_DIR,
             device="cpu",
-            enable_hpi=len(onnx_providers) > 0,
+            enable_hpi=enable_hpi,
         )
 
     def detect_subtitle(self, img):

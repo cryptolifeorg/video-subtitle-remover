@@ -171,15 +171,18 @@ def get_inpaint_area_by_mask(W, H, h, mask, multiple=1):
                     ymax = H
                     ymin = max(0, H - h)
             else:
-                # 孤岛总高度超过h，无法完全包含，优先包含中心区域
-                # 计算孤岛的中心
-                island_center = (min_y + max_y) // 2
-                ymin = max(0, island_center - half_h)
-                ymax = ymin + h
-                # 如果超出底部，从底部向上调整
-                if ymax > H:
-                    ymax = H
-                    ymin = max(0, H - h)
+                # 全屏/超高 mask：自上而下分条，避免只修画面中部一条带
+                y_cursor = min_y
+                while y_cursor < max_y:
+                    strip_ymin = y_cursor
+                    strip_ymax = min(y_cursor + h, H)
+                    area = (int(strip_ymin), int(strip_ymax), 0, int(W))
+                    if area not in inpaint_area:
+                        inpaint_area.append(area)
+                    if strip_ymax >= max_y:
+                        break
+                    y_cursor = strip_ymax
+                continue
         
         # 使用完整宽度
         xmin = 0

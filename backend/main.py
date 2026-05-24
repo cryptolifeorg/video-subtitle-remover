@@ -246,7 +246,7 @@ class SubtitleRemover:
 
     def sttn_auto_mode(self, tbar):
         """
-        使用sttn对选中区域进行重绘，不进行字幕检测
+        使用sttn对选中区域进行重绘，不进行字幕检测（与 VSR GUI「STTN 智能擦除」一致，高帧率）。
         """
         self.append_output(tr['Main']['ProcessingStartRemovingSubtitles'])
         mask_area_coordinates = []
@@ -513,5 +513,7 @@ if __name__ == '__main__':
     sr.sub_areas = args.subtitle_area_coords
     sr.video_out_path = args.output
     config.inpaintMode.value = args.inpaint_mode
+    if getattr(args, "subtitle_detect_mode", None) is not None:
+        config.set(config.subtitleDetectMode, args.subtitle_detect_mode)
     sr.run()
         
