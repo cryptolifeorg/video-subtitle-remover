@@ -106,20 +106,22 @@ Please ensure that you have installed Python 3.12+.
 
 #### 2. Install Dependencies
 
+> **VideoWorkbench users**: VSR uses **`{VIDEOBENCH_HOME}/envs/vsr`**, managed by **`bin/install.ps1`**. Skip manual venv creation; run **`main.bat`** / **`gui.bat`** at the repo root.
+
 It is recommended to use a virtual environment to manage project dependencies to avoid conflicts with the system environment.
 
 (1) Create and activate the virtual environment:
 ```shell
-python -m venv videoEnv
+python -m venv vsr
 ```
 
 - Windows:
 ```shell
-videoEnv\\Scripts\\activate
+vsr\\Scripts\\activate
 ```
 - MacOS/Linux:
 ```shell
-source videoEnv/bin/activate
+source vsr/bin/activate
 ```
 
 #### 3. Create and Activate Project Directory

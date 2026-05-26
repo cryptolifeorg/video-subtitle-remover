@@ -1,2 +1,2 @@
-call d:\videoEnv\Scripts\activate.bat
+call "%~dp0..\..\bin\activate-vsr.cmd"
 python ./backend/main.py

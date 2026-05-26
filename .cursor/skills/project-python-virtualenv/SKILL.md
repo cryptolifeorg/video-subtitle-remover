@@ -1,10 +1,11 @@
 ---
 name: project-python-virtualenv
 description: >-
-  本仓库的 Python 虚拟环境根目录；运行、安装依赖或执行脚本时使用 D:\videoEnv
-  下的解释器（Windows 下一般为 D:\videoEnv\Scripts\python.exe）。
+  VSR 使用 {VIDEOBENCH_HOME}/envs/vsr/Scripts/python.exe（与 main 编排环境分离）。
 ---
 
 # 项目 Python 虚拟环境路径
 
-D:\video-subtitle-remover项目的python虚拟环境在D:\videoEnv
+**video-subtitle-remover** 在 VideoWorkbench 布局中使用 **`{VIDEOBENCH_HOME}/envs/vsr`**。
+
+安装：`{VIDEOBENCH_HOME}/bin/install.ps1`。便捷启动：仓库根 **`main.bat`** / **`gui.bat`**（调用 `bin/activate-vsr.cmd`）。

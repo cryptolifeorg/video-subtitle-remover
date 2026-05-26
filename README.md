@@ -107,20 +107,22 @@ options:
 
 #### 2. 安装依赖文件
 
+> **VideoWorkbench 用户**：VSR 使用 **`{VIDEOBENCH_HOME}/envs/vsr`**，由 **`bin/install.ps1`** 管理；可跳过本节手动建 venv，直接运行仓库根目录 **`main.bat`** / **`gui.bat`**（自动解析 VideoWorkbench 根）。
+
 请使用虚拟环境来管理项目依赖，避免与系统环境冲突。
 
 （1）创建虚拟环境并激活
 ```shell
-python -m venv videoEnv
+python -m venv vsr
 ```
 
 - Windows：
 ```shell
-videoEnv\\Scripts\\activate
+vsr\\Scripts\\activate
 ```
 - MacOS/Linux：
 ```shell
-source videoEnv/bin/activate
+source vsr/bin/activate
 ```
 
 #### 3. 创建并激活项目目录
