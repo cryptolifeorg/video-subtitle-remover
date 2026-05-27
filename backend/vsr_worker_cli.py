@@ -1,4 +1,4 @@
-"""Long-lived VSR worker for VideoSearch pipeline (JSON lines on stdin).
+"""Long-lived VSR worker for video-workflow pipeline (JSON lines on stdin).
 
 One Python process loads Torch/Paddle once per pipeline run; each line is one clip job.
 """
