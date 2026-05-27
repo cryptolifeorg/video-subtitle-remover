@@ -52,7 +52,7 @@ def _warmup_once() -> None:
 
 _WARMED = False
 
-# Parent reads only this stream for JSON replies (see video_workflow.vsr_subprocess).
+# Parent reads only this stream for JSON replies (see workflow.vsr_subprocess).
 _JSON_OUT = sys.stdout
 
 
