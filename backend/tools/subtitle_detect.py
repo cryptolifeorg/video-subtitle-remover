@@ -51,6 +51,9 @@ class SubtitleDetect:
 
     @cached_property
     def text_detector(self):
+        # Windows: paddle before torch breaks torch lib\\shm.dll (WinError 127).
+        import torch  # noqa: F401
+
         import paddle
         paddle.disable_signal_handler()
         from paddleocr import TextDetection

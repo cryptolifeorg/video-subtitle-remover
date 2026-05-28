@@ -1,4 +1,6 @@
 filesplit==3.0.2
+protobuf==3.20.2
+pydantic-core==2.46.4
 opencv-python==4.11.0.86
 scikit-image==0.25.2
 tqdm==4.67.1
@@ -7,6 +9,7 @@ numpy==2.2.5
 av==17.0.0
 einops==0.8.1
 paddleocr==3.4.0
+paddlex>=3.4.0,<3.5.0
 matplotlib
 Pillow
 scipy

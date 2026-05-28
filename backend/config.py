@@ -42,6 +42,11 @@ class Config(QConfig):
     # 默认值为一个选区，格式为："ymin,ymax,xmin,xmax;ymin,ymax,xmin,xmax;..."，分号分隔不同选区
     subtitleSelectionAreas = ConfigItem("Main", "SubtitleSelectionAreas", "0.88,0.99,0.15,0.85")
 
+    # 提取速度慢怎么办
+    # 修改backend/config.py中的参数，可以大幅度提高去除速度
+
+    STTN_SKIP_DETECTION = True # 跳过字幕检测，跳过后可能会导致要去除的字幕遗漏或者误伤不需要去除字幕的视频帧
+
     """
     MODE可选算法类型
     - InpaintMode.STTN_AUTO 智能擦除版

@@ -403,13 +403,23 @@ class SubtitleRemover:
     def log_model(self):
         model_friendly_name = list(tr['InpaintMode'].values())[list(InpaintMode).index(config.inpaintMode.value)]
         model_device = 'CPU'
+        torch_on_gpu = self.hardware_accelerator.has_cuda() or self.hardware_accelerator.has_mps()
         if config.inpaintMode.value != InpaintMode.OPENCV and self.hardware_accelerator.has_accelerator():
             accelerator_name = self.hardware_accelerator.accelerator_name
             if accelerator_name == 'DirectML' and config.inpaintMode.value in [InpaintMode.STTN_AUTO, InpaintMode.STTN_DET]:
                 model_device = 'DirectML'
-            if self.hardware_accelerator.has_cuda() or self.hardware_accelerator.has_mps():
+            if torch_on_gpu:
                 model_device = accelerator_name
         self.append_output(tr['Main']['SubtitleRemoverModel'].format(f"{model_friendly_name} ({model_device})"))
+        if (
+            not torch_on_gpu
+            and config.inpaintMode.value in [InpaintMode.STTN_AUTO, InpaintMode.STTN_DET, InpaintMode.LAMA, InpaintMode.PROPAINTER]
+            and any("CUDA" in p for p in self.hardware_accelerator.onnx_providers)
+        ):
+            self.append_output(
+                "警告：去字幕主模型在 CPU 上运行（PyTorch 未检测到 CUDA）。"
+                "请在 VideoWorkbench 的 envs/vsr 安装 GPU 版 torch（bin\\install.ps1）。"
+            )
         providers = ", ".join(self.hardware_accelerator.onnx_providers)
         providers_str = f" ({providers})" if providers else ""
         detect_mode_name = list(tr['SubtitleDetectMode'].values())[list(SubtitleDetectMode).index(config.subtitleDetectMode.value)]

@@ -104,6 +104,7 @@ def _process_job(job: dict) -> None:
 def main() -> int:
     multiprocessing.set_start_method("spawn", force=True)
     _configure_stdio()
+    _warmup_once()
     for line in sys.stdin:
         line = line.strip()
         if not line:

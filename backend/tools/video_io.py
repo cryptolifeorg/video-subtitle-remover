@@ -31,6 +31,11 @@ class FramePrefetcher:
 
     def read(self):
         """读取下一帧，接口与 cv2.VideoCapture.read() 一致。"""
+        if not self._thread.is_alive():
+            try:
+                return self._buffer.get_nowait()
+            except queue.Empty:
+                return False, None
         return self._buffer.get()
 
     def get(self, propId):
